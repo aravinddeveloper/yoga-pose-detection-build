@@ -6,7 +6,7 @@ from sagemaker.estimator import Estimator
 from sagemaker.inputs import TrainingInput
 from sagemaker.model_metrics import MetricsSource, ModelMetrics
 from sagemaker.processing import ProcessingInput, ProcessingOutput, ScriptProcessor
-from sagemaker.sklearn.processing import PyTorchProcessor
+from sagemaker.pytorch.processing import PyTorchProcessor
 from sagemaker.workflow.condition_step import ConditionStep
 from sagemaker.workflow.conditions import ConditionGreaterThanOrEqualTo
 from sagemaker.workflow.functions import JsonGet
@@ -129,8 +129,8 @@ def get_pipeline( region,
         environment=env_variables,
         sagemaker_session=pipeline_session)
     
-    pt_estimator.set_hyperparameters("epochs"=epochs,
-                                     "batch-size"=batch_size)
+    pt_estimator.set_hyperparameters(epochs=epochs,
+                                     batch_size=batch_size)
     
     step_train = TrainingStep(
         name="training-step",
