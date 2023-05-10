@@ -13,6 +13,7 @@ phases:
       - export PYTHONUNBUFFERED=TRUE
       - export SAGEMAKER_PROJECT_NAME_ID="${SAGEMAKER_PROJECT_NAME}-${SAGEMAKER_PROJECT_ID}"
       - echo "$PWD"
+      - tree -a
       - |
         run-pipeline \
           --module-name pipelines.code_scripts.pipeline \
