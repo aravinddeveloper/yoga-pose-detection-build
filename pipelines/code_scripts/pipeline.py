@@ -46,6 +46,7 @@ def get_pipeline( region,
         role = sagemaker.session.get_execution_role(sagemaker_session)
         
     # Parameters for preprocessing pipeline execution
+    print("Setting parameters for pipeline")
     processing_instance_count = ParameterInteger(name="ProcessingInstanceCount", default_value=1)
     processing_instance_type = ParameterString(
         name="ProcessingInstanceType", default_value="ml.m5.xlarge"
@@ -86,6 +87,7 @@ def get_pipeline( region,
         expire_after="T1H"
     )
     
+    print("Setting pytorch processor")
     processor = PyTorchProcessor(role=role,
                                  framework_version="1.8",
                                  instance_type=processing_instance_type,
@@ -113,7 +115,8 @@ def get_pipeline( region,
         "SM_CHANNEL_TRAIN":f"{MODEL_PATH}/train/",
         "SM_CHANNEL_VAL":f"{MODEL_PATH}/val/"
     }
-
+    
+    print("Setting Training estimator")
     pt_estimator = PyTorch(
         entry_point="train.py",
         role=get_execution_role(),
@@ -148,6 +151,7 @@ def get_pipeline( region,
         cache_config=cache_config)
     
     # Processing step for evaluation
+    print("Setting model evaluation")
     model_eval = PyTorchProcessor(role=role,
                                  framework_version="1.8",
                                  instance_type=processing_instance_type,
@@ -191,6 +195,7 @@ def get_pipeline( region,
     )
     
     # Register model step that will be conditionally executed
+    print("Registering model")
     step_register = RegisterModel(
         name="register-model",
         estimator=pt_estimator,
@@ -217,6 +222,7 @@ def get_pipeline( region,
     )
     
     # Pipeline instance
+    print("Building final pipeline")
     pipeline = Pipeline(
         name=pipeline_name,
         parameters=[
