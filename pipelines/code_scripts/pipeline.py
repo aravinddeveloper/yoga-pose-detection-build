@@ -36,6 +36,7 @@ def get_session(region, default_bucket=BUCKET_NAME):
     )
 
 def get_pipeline( region,
+                 default_bucket=BUCKET_NAME,
                  role=None,
                  model_package_group_name="YogaPoseDetectionPackageGroup",  # Choose any name
                  pipeline_name="yogapose-detection-pipeline",  # You can find your pipeline name in the Studio UI (project -> Pipelines -> name)
