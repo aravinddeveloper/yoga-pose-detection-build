@@ -69,7 +69,7 @@ def get_pipeline( region,
         name="ValidationFolderName",
         default_value="val"  # Change this to point to the s3 location of your raw input data.
     )
-    val_folder = ParameterString(
+    eval_folder = ParameterString(
         name="EvaluationFolderName",
         default_value="eval"  # Change this to point to the s3 location of your raw input data.
     )
@@ -184,11 +184,11 @@ def get_pipeline( region,
         inputs=[
             ProcessingInput(
                 source=step_train.properties.ModelArtifacts.S3ModelArtifacts,
-                destination="/opt/ml/processing/model",
+                destination="/opt/ml/processing/model"
             ),
             ProcessingInput(
                 source=processing_step.properties.ProcessingOutputConfig.Outputs["eval"].S3Output.S3Uri,
-                destination="/opt/ml/processing/eval",
+                destination="/opt/ml/processing/eval"
             )
         ],
         outputs=[
@@ -250,13 +250,14 @@ def get_pipeline( region,
             batch_size,
             train_folder,
             val_folder,
+            eval_folder,
             model_approval_status,
             input_data_path,
             processed_data_path,
             model_path
         ],
         steps=[processing_step, step_train, step_eval, step_condition],
-        sagemaker_session=sagemaker_session,
+        sagemaker_session=sagemaker_session
     )
     return pipeline
     
