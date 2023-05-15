@@ -15,6 +15,7 @@ from sagemaker.workflow.pipeline import Pipeline
 from sagemaker.workflow.properties import PropertyFile
 from sagemaker.workflow.step_collections import RegisterModel
 from sagemaker.workflow.steps import ProcessingStep, TrainingStep, CacheConfig
+from sagemaker.workflow.functions import Join
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 BUCKET_NAME = "aravind-aws-ml-sagemaker"
@@ -71,15 +72,15 @@ def get_pipeline( region,
     )
     input_data_path = ParameterString(
         name="InputDataUrl",
-        default_value=f"s3://{BUCKET_NAME}/input",  # Change this to point to the s3 location of your raw input data.
+        default_value=Join(on="",values=["s3://",BUCKET_NAME,"/input"]) #f"s3://{BUCKET_NAME}/input",  # Change this to point to the s3 location of your raw input data.
     )
     processed_data_path = ParameterString(
         name="OutputDataUrl",
-        default_value=f"s3://{BUCKET_NAME}/processed",  # Change this to point to the s3 location of your raw input data.
+        default_value=Join(on="",values=["s3://",BUCKET_NAME,"/processed"]) #f"s3://{BUCKET_NAME}/processed",  # Change this to point to the s3 location of your raw input data.
     )
     model_path = ParameterString(
         name="ModelPath",
-        default_value=f"s3://{BUCKET_NAME}/model",  # Change this to point to the s3 location of your raw input data.
+        default_value=Join(on="",values=["s3://",BUCKET_NAME,"/model"]) #f"s3://{BUCKET_NAME}/model",  # Change this to point to the s3 location of your raw input data.
     )
     
     cache_config = CacheConfig(
@@ -93,19 +94,19 @@ def get_pipeline( region,
                                  instance_type=processing_instance_type,
                                  instance_count=processing_instance_count,
                                  sagemaker_session=sagemaker_session)
-    
+
     processing_step = ProcessingStep(name="pre-processing-step",
                                      processor=processor,
                                      inputs=ProcessingInput(input_name="raw-data",
                                                             source=input_data_path,
-                                                            destination=f"{PROCESSING_PATH}/input"),
+                                                            destination=Join(on="",values=[PROCESSING_PATH,"/input"]),
                                      code=os.path.join(BASE_DIR,"processing.py"),
                                      outputs=[ProcessingOutput(output_name=train_folder,
-                                                               source=f"{PROCESSING_PATH}/{train_folder}",
-                                                               destination=f"{processed_data_path}/{train_folder}"),
+                                                               source=Join(on="",values=[PROCESSING_PATH,"/",train_folder]),
+                                                               destination=Join(on="",values=[processed_data_path,"/",train_folder]),
                                               ProcessingOutput(output_name=val_folder,
-                                                               source=f"{PROCESSING_PATH}/{val_folder}",
-                                                               destination=f"{processed_data_path}/{val_folder}")],
+                                                               source=Join(on="",values=[PROCESSING_PATH,"/",val_folder]),
+                                                               destination=Join(on="",values=[processed_data_path,"/",val_folder]),
                                     cache_config=cache_config)
     #Env variables
     env_variables = {
@@ -126,7 +127,7 @@ def get_pipeline( region,
         instance_count=training_instance_count,
         instance_type=training_instance_type,
         use_spot_instances=True,
-        checkpoint_s3_uri=f"s3://{BUCKET_NAME}/{base_job_prefix}/checkpoints/",
+        checkpoint_s3_uri=Join(on="",values=["s3://",BUCKET_NAME,"/",base_job_prefix,"/checkpoints/"]),
         checkpoint_local_path="/opt/ml/checkpoints/",
         max_run=3600,
         max_wait=3800,
