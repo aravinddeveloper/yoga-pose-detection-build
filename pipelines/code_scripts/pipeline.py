@@ -99,14 +99,14 @@ def get_pipeline( region,
                                      processor=processor,
                                      inputs=ProcessingInput(input_name="raw-data",
                                                             source=input_data_path,
-                                                            destination=Join(on="",values=[PROCESSING_PATH,"/input"]),
+                                                            destination=Join(on="",values=[PROCESSING_PATH,"/input"])),
                                      code=os.path.join(BASE_DIR,"processing.py"),
                                      outputs=[ProcessingOutput(output_name=train_folder,
                                                                source=Join(on="",values=[PROCESSING_PATH,"/",train_folder]),
-                                                               destination=Join(on="",values=[processed_data_path,"/",train_folder]),
+                                                               destination=Join(on="",values=[processed_data_path,"/",train_folder])),
                                               ProcessingOutput(output_name=val_folder,
                                                                source=Join(on="",values=[PROCESSING_PATH,"/",val_folder]),
-                                                               destination=Join(on="",values=[processed_data_path,"/",val_folder]),
+                                                               destination=Join(on="",values=[processed_data_path,"/",val_folder]))],
                                     cache_config=cache_config)
     #Env variables
     env_variables = {
