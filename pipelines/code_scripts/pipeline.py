@@ -72,15 +72,15 @@ def get_pipeline( region,
     )
     input_data_path = ParameterString(
         name="InputDataUrl",
-        default_value=Join(on="",values=["s3://",BUCKET_NAME,"/input"]) #f"s3://{BUCKET_NAME}/input",  # Change this to point to the s3 location of your raw input data.
+        default_value=f"s3://{BUCKET_NAME}/input" #Join(on="",values=["s3://",BUCKET_NAME,"/input"]) #f"s3://{BUCKET_NAME}/input",  # Change this to point to the s3 location of your raw input data.
     )
     processed_data_path = ParameterString(
         name="OutputDataUrl",
-        default_value=Join(on="",values=["s3://",BUCKET_NAME,"/processed"]) #f"s3://{BUCKET_NAME}/processed",  # Change this to point to the s3 location of your raw input data.
+        default_value=f"s3://{BUCKET_NAME}/processed" #Join(on="",values=["s3://",BUCKET_NAME,"/processed"]) ,  # Change this to point to the s3 location of your raw input data.
     )
     model_path = ParameterString(
         name="ModelPath",
-        default_value=Join(on="",values=["s3://",BUCKET_NAME,"/model"]) #f"s3://{BUCKET_NAME}/model",  # Change this to point to the s3 location of your raw input data.
+        default_value=f"s3://{BUCKET_NAME}/model" #Join(on="",values=["s3://",BUCKET_NAME,"/model"]) #,  # Change this to point to the s3 location of your raw input data.
     )
     
     cache_config = CacheConfig(
