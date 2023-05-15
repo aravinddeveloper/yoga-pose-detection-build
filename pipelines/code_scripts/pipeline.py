@@ -133,7 +133,7 @@ def get_pipeline( region,
         max_run=3600,
         max_wait=3800,
         environment=env_variables,
-        sagemaker_session=pipeline_session)
+        sagemaker_session=sagemaker_session)
     
     pt_estimator.set_hyperparameters(epochs=epochs,
                                      batch_size=batch_size)
