@@ -121,7 +121,7 @@ def get_pipeline( region,
     print("Setting Training estimator")
     pt_estimator = PyTorch(
         entry_point="train.py",
-        role=get_execution_role(),
+        role=role,
         source_dir=BASE_DIR,
         framework_version="1.8.0",
         py_version="py3",
