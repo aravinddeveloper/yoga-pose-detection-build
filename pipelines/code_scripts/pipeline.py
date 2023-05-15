@@ -128,16 +128,17 @@ def get_pipeline( region,
         instance_count=training_instance_count,
         instance_type=training_instance_type,
         use_spot_instances=True,
-        checkpoint_s3_uri=Join(on="",values=["s3://",BUCKET_NAME,"/",base_job_prefix,"/checkpoints/"]),
+        checkpoint_s3_uri=f"S3://{BUCKET_NAME}/{base_job_prefix}/checkpoints/",   #Join(on="",values=["s3://",BUCKET_NAME,"/",base_job_prefix,"/checkpoints/"])
         checkpoint_local_path="/opt/ml/checkpoints/",
         max_run=3600,
         max_wait=3800,
         environment=env_variables,
         sagemaker_session=sagemaker_session)
     
+    print("Setting hyperparameters")
     pt_estimator.set_hyperparameters(epochs=epochs,
                                      batch_size=batch_size)
-    
+    print("Setting training step")
     step_train = TrainingStep(
         name="training-step",
         estimator=pt_estimator,
@@ -153,7 +154,7 @@ def get_pipeline( region,
         cache_config=cache_config)
     
     # Processing step for evaluation
-    print("Setting model evaluation")
+    print("Setting model evaluation processor")
     model_eval = PyTorchProcessor(role=role,
                                  framework_version="1.8",
                                  instance_type=processing_instance_type,
@@ -166,6 +167,7 @@ def get_pipeline( region,
         path="evaluation.json",
     )
     
+    print("Setting model evaluation step")
     step_eval = ProcessingStep(
         name="evaluation-step",
         processor=model_eval,
@@ -187,6 +189,7 @@ def get_pipeline( region,
     )
     
     # Register model step that will be conditionally executed
+    print("Setting model metrics")
     model_metrics = ModelMetrics(
         model_statistics=MetricsSource(
             s3_uri="{}/evaluation.json".format(
@@ -215,6 +218,7 @@ def get_pipeline( region,
         json_path="multiclass_classification_metrics.accuracy.value"
     )
     
+    print("condition step")
     condition = ConditionGreaterThanOrEqualTo(left=accuracy_score,right=0.8)
     step_condition = ConditionStep(
         name="evaluation-condition-check",
