@@ -22,7 +22,9 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 BUCKET_NAME = "aravind-aws-ml-sagemaker"
 PROCESSING_PATH = "/opt/ml/processing"
 MODEL_PATH = "/opt/ml/model"
-
+train_folder_name="train"
+val_folder_name="val"
+eval_folder_name="eval"
 
 def get_session(region, default_bucket=BUCKET_NAME):
   
@@ -67,6 +69,10 @@ def get_pipeline( region,
         name="ValidationFolderName",
         default_value="val"  # Change this to point to the s3 location of your raw input data.
     )
+    val_folder = ParameterString(
+        name="EvaluationFolderName",
+        default_value="eval"  # Change this to point to the s3 location of your raw input data.
+    )
     model_approval_status = ParameterString(
         name="ModelApprovalStatus",
         default_value="PendingManualApproval",  # ModelApprovalStatus can be set to a default of "Approved" if you don't want manual approval.
@@ -102,12 +108,16 @@ def get_pipeline( region,
                                                             source=input_data_path,
                                                             destination=Join(on="",values=[PROCESSING_PATH,"/input"])),
                                      code=os.path.join(BASE_DIR,"processing.py"),
-                                     outputs=[ProcessingOutput(output_name=train_folder,
-                                                               source=Join(on="",values=[PROCESSING_PATH,"/",train_folder]),
-                                                               destination=Join(on="",values=[processed_data_path,"/",train_folder])),
-                                              ProcessingOutput(output_name=val_folder,
-                                                               source=Join(on="",values=[PROCESSING_PATH,"/",val_folder]),
-                                                               destination=Join(on="",values=[processed_data_path,"/",val_folder]))],
+                                     outputs=[ProcessingOutput(output_name=train_folder_name,
+                                                               source=Join(on="",values=[PROCESSING_PATH,"/",train_folder_name]),
+                                                               destination=Join(on="",values=[processed_data_path,"/",train_folder_name])),
+                                              ProcessingOutput(output_name=val_folder_name,
+                                                               source=Join(on="",values=[PROCESSING_PATH,"/",val_folder_name]),
+                                                               destination=Join(on="",values=[processed_data_path,"/",val_folder_name])),
+                                              ProcessingOutput(output_name=eval_folder_name,
+                                                               source=Join(on="",values=[PROCESSING_PATH,"/",eval_folder_name]),
+                                                               destination=Join(on="",values=[processed_data_path,"/",eval_folder_name]))],
+                                     
                                     cache_config=cache_config)
     #Env variables
     env_variables = {
@@ -143,11 +153,11 @@ def get_pipeline( region,
         name="training-step",
         estimator=pt_estimator,
         inputs={
-            train_folder: TrainingInput(
-                s3_data=processing_step.properties.ProcessingOutputConfig.Outputs[train_folder].S3Output.S3Uri
+            train_folder_name: TrainingInput(
+                s3_data=processing_step.properties.ProcessingOutputConfig.Outputs[train_folder_name].S3Output.S3Uri
             ),
-            val_folder: TrainingInput(
-                s3_data=processing_step.properties.ProcessingOutputConfig.Outputs[val_folder].S3Output.S3Uri
+            val_folder_name: TrainingInput(
+                s3_data=processing_step.properties.ProcessingOutputConfig.Outputs[val_folder_name].S3Output.S3Uri
             )
         },
         depends_on=processing_step,

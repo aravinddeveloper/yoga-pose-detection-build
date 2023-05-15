@@ -16,6 +16,7 @@ PROCESSING_PATH = "/opt/ml/processing/"
 def preprocess_image(args,list_of_file_and_label):
     df = pd.DataFrame(data=list_of_file_and_label,columns=["path","label"])
     x_train,x_test,y_train,y_test = train_test_split(df.path,df.label,test_size=args.train_test_split_ratio,random_state=42,shuffle=True,stratify=df.label)
+    x_train,x_eval,y_train,y_eval = train_test_split(x_train.path,x_train.label,test_size=0.1,random_state=42,shuffle=True,stratify=df.label)
     data_transforms = {
         'train': transforms.Compose([
             transforms.RandomResizedCrop(224),
@@ -23,6 +24,11 @@ def preprocess_image(args,list_of_file_and_label):
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])]),
         'val': transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])]),
+        'eval': transforms.Compose([
             transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
@@ -38,6 +44,12 @@ def preprocess_image(args,list_of_file_and_label):
         file_name = image_path.split("/")[-1]
         image_tensor = data_transforms["val"](Image.open(image_path))
         save_image(image_tensor,f"{PROCESSING_PATH}/{args.process_val_folder}/output/{label}/{file_name}")
+        
+    for image_path,label in zip(x_eval,y_eval):
+        file_name = image_path.split("/")[-1]
+        image_tensor = data_transforms["eval"](Image.open(image_path))
+        save_image(image_tensor,f"{PROCESSING_PATH}/{args.process_eval_folder}/output/{label}/{file_name}")
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -56,6 +68,7 @@ def parse_args():
     parser.add_argument("--process-input-folder", type=str, default=PROCESSING_PATH+"input")
     parser.add_argument("--process-train-folder", type=str, default=PROCESSING_PATH+"train")
     parser.add_argument("--process-val-folder", type=str, default=PROCESSING_PATH+"val")
+    parser.add_argument("--process-eval-folder", type=str, default=PROCESSING_PATH+"eval")
     
 if __name__ == "__main__":
     args = parse_args()
