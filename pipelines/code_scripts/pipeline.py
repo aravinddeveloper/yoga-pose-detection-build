@@ -187,7 +187,7 @@ def get_pipeline( region,
                 destination="/opt/ml/processing/model",
             ),
             ProcessingInput(
-                source=step_process.properties.ProcessingOutputConfig.Outputs["eval"].S3Output.S3Uri,
+                source=processing_step.properties.ProcessingOutputConfig.Outputs["eval"].S3Output.S3Uri,
                 destination="/opt/ml/processing/eval",
             )
         ],
