@@ -192,7 +192,7 @@ def get_pipeline( region,
             )
         ],
         outputs=[
-            ProcessingOutput(output_name="evaluation", source="/opt/ml/processing/eval"),
+            ProcessingOutput(output_name="evaluation", source="/opt/ml/processing/eval")
         ],
         code=os.path.join(BASE_DIR, "evaluation.py"),
         property_files=[evaluation_report]
