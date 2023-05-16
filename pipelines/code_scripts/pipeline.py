@@ -101,10 +101,9 @@ def get_pipeline( region,
                                  instance_type=processing_instance_type,
                                  instance_count=processing_instance_count,
                                  sagemaker_session=sagemaker_session)
-
-    processing_step = ProcessingStep(name="pre-processing-step",
-                                     processor=processor,
-                                     inputs=[ProcessingInput(input_name="raw-data",
+    
+    print("setting processing step args")
+    proc_args = processor.run(inputs=[ProcessingInput(input_name="raw-data",
                                                             source=input_data_path,
                                                             destination=Join(on="",values=[PROCESSING_PATH,"/input"]))],
                                      code=os.path.join(BASE_DIR,"processing.py"),
@@ -116,9 +115,28 @@ def get_pipeline( region,
                                                                destination=Join(on="",values=[processed_data_path,"/",val_folder_name])),
                                               ProcessingOutput(output_name=eval_folder_name,
                                                                source=Join(on="",values=[PROCESSING_PATH,"/",eval_folder_name]),
-                                                               destination=Join(on="",values=[processed_data_path,"/",eval_folder_name]))],
+                                                               destination=Join(on="",values=[processed_data_path,"/",eval_folder_name]))])
+    print("Building processing step")
+    processing_step = ProcessingStep(name="pre-processing-step",
+                                     step_args=proc_args,
+                                     cache_config=cache_config)
+#     processing_step = ProcessingStep(name="pre-processing-step",
+#                                      processor=processor,
+#                                      inputs=[ProcessingInput(input_name="raw-data",
+#                                                             source=input_data_path,
+#                                                             destination=Join(on="",values=[PROCESSING_PATH,"/input"]))],
+#                                      code=os.path.join(BASE_DIR,"processing.py"),
+#                                      outputs=[ProcessingOutput(output_name=train_folder_name,
+#                                                                source=Join(on="",values=[PROCESSING_PATH,"/",train_folder_name]),
+#                                                                destination=Join(on="",values=[processed_data_path,"/",train_folder_name])),
+#                                               ProcessingOutput(output_name=val_folder_name,
+#                                                                source=Join(on="",values=[PROCESSING_PATH,"/",val_folder_name]),
+#                                                                destination=Join(on="",values=[processed_data_path,"/",val_folder_name])),
+#                                               ProcessingOutput(output_name=eval_folder_name,
+#                                                                source=Join(on="",values=[PROCESSING_PATH,"/",eval_folder_name]),
+#                                                                destination=Join(on="",values=[processed_data_path,"/",eval_folder_name]))],
                                      
-                                    cache_config=cache_config)
+#                                     cache_config=cache_config)
     #Env variables
     env_variables = {
         "SM_NUM_GPUS":"1",
@@ -177,11 +195,8 @@ def get_pipeline( region,
         path="evaluation.json",
     )
     
-    print("Setting model evaluation step")
-    step_eval = ProcessingStep(
-        name="evaluation-step",
-        processor=model_eval,
-        inputs=[
+    print("setting evaluation step args")
+    eval_args = model_eval.run( inputs=[
             ProcessingInput(
                 source=step_train.properties.ModelArtifacts.S3ModelArtifacts,
                 destination="/opt/ml/processing/model"
@@ -194,9 +209,31 @@ def get_pipeline( region,
         outputs=[
             ProcessingOutput(output_name="evaluation", source="/opt/ml/processing/eval")
         ],
-        code=os.path.join(BASE_DIR, "evaluation.py"),
-        property_files=[evaluation_report]
-    )
+        code=os.path.join(BASE_DIR, "evaluation.py"))
+    
+    print("Setting model evaluation step")
+    # step_eval = ProcessingStep(
+    #     name="evaluation-step",
+    #     processor=model_eval,
+    #     inputs=[
+    #         ProcessingInput(
+    #             source=step_train.properties.ModelArtifacts.S3ModelArtifacts,
+    #             destination="/opt/ml/processing/model"
+    #         ),
+    #         ProcessingInput(
+    #             source=processing_step.properties.ProcessingOutputConfig.Outputs["eval"].S3Output.S3Uri,
+    #             destination="/opt/ml/processing/eval"
+    #         )
+    #     ],
+    #     outputs=[
+    #         ProcessingOutput(output_name="evaluation", source="/opt/ml/processing/eval")
+    #     ],
+    #     code=os.path.join(BASE_DIR, "evaluation.py"),
+    #     property_files=[evaluation_report]
+    # )
+    step_eval=ProcessingStep(name="evaluation-step",
+                             step_args=eval_args,
+                             property_files=[evaluation_report])
     
     # Register model step that will be conditionally executed
     print("Setting model metrics")
