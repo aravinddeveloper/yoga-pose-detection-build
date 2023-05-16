@@ -115,7 +115,12 @@ def get_pipeline( region,
                                                         destination=Join(on="",values=[processed_data_path,"/",val_folder_name])),
                                        ProcessingOutput(output_name=eval_folder_name,
                                                         source=Join(on="",values=[PROCESSING_PATH,"/",eval_folder_name]),
-                                                        destination=Join(on="",values=[processed_data_path,"/",eval_folder_name]))])
+                                                        destination=Join(on="",values=[processed_data_path,"/",eval_folder_name]))],
+                              arguments=["--train-test-split_ratio", 0.1, 
+                                         "--process-input-folder","input",
+                                         "--process-train-folder","train",
+                                         "--process-val-folder","val",
+                                         "--process-eval-folder","eval"])
     print("Building processing step")
     processing_step = ProcessingStep(name="pre-processing-step",
                                      step_args=proc_args,
