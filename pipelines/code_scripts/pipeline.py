@@ -27,23 +27,25 @@ train_folder_name="train"
 val_folder_name="val"
 eval_folder_name="eval"
 
-def get_session(region, default_bucket=BUCKET_NAME):
+def get_session(region, default_bucket=BUCKET_NAME,pipe_session=False):
   
     boto_session = boto3.Session(region_name=region)
 
     sagemaker_client = boto_session.client("sagemaker")
     runtime_client = boto_session.client("sagemaker-runtime")
-    # return sagemaker.session.Session(
-    #     boto_session=boto_session,
-    #     sagemaker_client=sagemaker_client,
-    #     sagemaker_runtime_client=runtime_client,
-    #     default_bucket=default_bucket,
-    # )
-    return PipelineSession(
-    boto_session=boto_session,
-    sagemaker_client=sagemaker_client,
-    default_bucket=default_bucket,
-    )
+    if pipe_session:
+        return PipelineSession(
+        boto_session=boto_session,
+        sagemaker_client=sagemaker_client,
+        default_bucket=default_bucket,
+        )
+    else:
+        return sagemaker.session.Session(
+            boto_session=boto_session,
+            sagemaker_client=sagemaker_client,
+            sagemaker_runtime_client=runtime_client,
+            default_bucket=default_bucket,
+        )
 
 def get_pipeline( region,
                  default_bucket=BUCKET_NAME,
@@ -305,6 +307,7 @@ def get_pipeline( region,
     
     # Pipeline instance
     print("Building final pipeline")
+    pipeline_session = get_session(region, default_bucket,pipe_session=True)
     pipeline = Pipeline(
         name=pipeline_name,
         parameters=[
@@ -323,7 +326,7 @@ def get_pipeline( region,
             model_path
         ],
         steps=[processing_step, step_train, step_eval, step_condition],
-        sagemaker_session=sagemaker_session
+        sagemaker_session=pipeline_session
     )
     return pipeline
     
