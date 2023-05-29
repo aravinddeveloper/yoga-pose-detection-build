@@ -27,7 +27,7 @@ train_folder_name="train"
 val_folder_name="val"
 eval_folder_name="eval"
 
-def get_session(region, default_bucket=BUCKET_NAME,pipe_session=False):
+def get_session(region, default_bucket=BUCKET_NAME,pipe_session=True):
   
     boto_session = boto3.Session(region_name=region)
 
