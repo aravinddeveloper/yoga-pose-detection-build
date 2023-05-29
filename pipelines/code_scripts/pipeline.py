@@ -17,6 +17,7 @@ from sagemaker.workflow.properties import PropertyFile
 from sagemaker.workflow.step_collections import RegisterModel
 from sagemaker.workflow.steps import ProcessingStep, TrainingStep, CacheConfig
 from sagemaker.workflow.functions import Join
+from sagemaker.workflow.pipeline_context import PipelineSession
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 BUCKET_NAME = "aravind-aws-ml-sagemaker"
@@ -32,11 +33,16 @@ def get_session(region, default_bucket=BUCKET_NAME):
 
     sagemaker_client = boto_session.client("sagemaker")
     runtime_client = boto_session.client("sagemaker-runtime")
-    return sagemaker.session.Session(
-        boto_session=boto_session,
-        sagemaker_client=sagemaker_client,
-        sagemaker_runtime_client=runtime_client,
-        default_bucket=default_bucket,
+    # return sagemaker.session.Session(
+    #     boto_session=boto_session,
+    #     sagemaker_client=sagemaker_client,
+    #     sagemaker_runtime_client=runtime_client,
+    #     default_bucket=default_bucket,
+    # )
+    return PipelineSession(
+    boto_session=boto_session,
+    sagemaker_client=sagemaker_client,
+    default_bucket=default_bucket,
     )
 
 def get_pipeline( region,
